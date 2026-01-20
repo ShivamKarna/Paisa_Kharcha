@@ -14,15 +14,11 @@ import { revalidatePath } from "next/cache";
 // transactions Transaction[]
 // createdAt DateTime @default(now())
 // updatedAt DateTime @updatedAt
-export interface DataType {
+export interface CreateAccountData {
   name: string;
   type: AccountType;
   balance: string;
   isDefault: boolean;
-  userId: string;
-  transactions: TransactionType;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const serializeTransaction = (obj: {
@@ -40,7 +36,7 @@ const serializeTransaction = (obj: {
   return serialized;
 };
 
-export async function createAccount(data: DataType) {
+export async function createAccount(data: CreateAccountData) {
   try {
     const { userId } = await auth();
     if (!userId) {
