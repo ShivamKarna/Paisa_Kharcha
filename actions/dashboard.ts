@@ -90,6 +90,7 @@ export async function createAccount(data: DataType) {
 
     const serializedAccount = serializeTransaction(account);
 
+    // Tell, next js, browser, toremove teh cached stale data from the /dashboard page and show the latest data from the db
     revalidatePath("/dashboard");
 
     return { success: true, data: serializedAccount };
