@@ -44,7 +44,7 @@ model Account{
   @@index([userId]) // to make the process faster when we look into a account for a specific user id
   @@map("accounts")
 }
-enum AccountType{
+ enum AccountType{
   CURRENT
   SAVINGS
 }
