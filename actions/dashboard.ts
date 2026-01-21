@@ -2,8 +2,9 @@
 
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
-import { AccountType, TransactionType } from "@/lib/generated/prisma/enums";
+import { AccountType } from "@/lib/generated/prisma/enums";
 import { revalidatePath } from "next/cache";
+import { Account } from "@/types/account";
 // id String @id @default(uuid())
 // name String
 // type AccountType
@@ -24,7 +25,7 @@ export interface CreateAccountData {
 const serializeTransaction = (obj: {
   balance?: { toNumber: () => number };
   [key: string]: unknown;
-}) => {
+}): Account => {
   const serialized: Record<string, unknown> = { ...obj };
   if (
     obj.balance &&
@@ -33,7 +34,7 @@ const serializeTransaction = (obj: {
   ) {
     serialized.balance = obj.balance.toNumber();
   }
-  return serialized;
+  return serialized as Account;
 };
 
 export async function createAccount(data: CreateAccountData) {
@@ -98,4 +99,35 @@ export async function createAccount(data: CreateAccountData) {
         : "An error occurred while creating account",
     );
   }
+}
+
+export async function getUserAccounts(): Promise<Account[]> {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not Found");
+  }
+
+  const accounts = await db.account.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      _count: {
+        select: {
+          transactions: true,
+        },
+      },
+    },
+  });
+  const serializedAccounts = accounts.map((account) =>
+    serializeTransaction(account),
+  );
+  return serializedAccounts;
 }
