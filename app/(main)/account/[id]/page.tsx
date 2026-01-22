@@ -16,7 +16,7 @@ export default async function AccountPage({
     notFound();
   }
 
-  const { transactions: _transactions, ...account } = accountData;
+  const { transactions, ...account } = accountData;
 
   return (
     <div className="space-y-8 px-5">
