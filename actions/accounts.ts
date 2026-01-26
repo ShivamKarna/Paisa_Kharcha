@@ -94,6 +94,72 @@ export async function getAccountWithTransactions(accountId: string) {
   };
 }
 
+export async function getAccountWithTransactionsPaginated(
+  accountId: string,
+  page: number = 1,
+  pageSize: number = 10,
+) {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not Found");
+  }
+
+  const account = await db.account.findUnique({
+    where: { id: accountId },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      balance: true,
+      isDefault: true,
+      userId: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: { transactions: true },
+      },
+    },
+  });
+
+  if (!account || account.userId !== user.id) return null;
+
+  const skip = (page - 1) * pageSize;
+  const [transactions, totalCount] = await Promise.all([
+    db.transaction.findMany({
+      where: { accountId },
+      orderBy: { date: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    db.transaction.count({
+      where: { accountId },
+    }),
+  ]);
+
+  const serializedAccount = serializeAccount(account);
+  const serializedTransactions = transactions.map((t) =>
+    serializeDecimal(t),
+  );
+
+  return {
+    ...serializedAccount,
+    transactions: serializedTransactions,
+    pagination: {
+      page,
+      pageSize,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+    },
+  };
+}
+
 
 const toNumber = (val: unknown): number => {
   if (val != null && typeof val === "object" && "toNumber" in val) {
