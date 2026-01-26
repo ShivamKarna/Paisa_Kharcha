@@ -50,7 +50,7 @@ import { Input } from "@/components/ui/input";
 import useFetch from "@/hooks/use-fetch";
 import { bulkDeleteTransactions, getAccountWithTransactionsPaginated } from "@/actions/accounts";
 import { toast } from "sonner";
-import { BarLoader } from "react-spinners";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const RECURRING_INTERVALS: Record<string, string> = {
   DAILY: "Daily",
@@ -253,20 +253,15 @@ const TransactionTable = ({
     setSelectedIds([]);
   };
   return (
-    <div className="space-y-4">
-      {(deleteLoading || fetchLoading) && 
-    <BarLoader className="mt-4" width={"100%"}color="#26d212"/>
-      }
-
-
+    <div className="space-y-4 max-w-full overflow-x-hidden">
     <div className="flex flex-col sm:flex-row gap-4">
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-w-0">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground"/>
-        <Input placeholder="Search Transactions..." value={searchTerm} onChange={(e)=> setSearchTerm(e.target.value) } className="pl-8"/>
+        <Input placeholder="Search Transactions..." value={searchTerm} onChange={(e)=> setSearchTerm(e.target.value) } className="pl-8 w-full"/>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger> 
+          <SelectTrigger className="w-full sm:w-auto"> 
             <SelectValue placeholder="All Types" />
           </SelectTrigger>
           <SelectContent>
@@ -275,7 +270,7 @@ const TransactionTable = ({
           </SelectContent>
         </Select>
         <Select value={recurringFilter} onValueChange={(value)=>setRecurringFilter(value)}>
-          <SelectTrigger className="w-[160px]"> 
+          <SelectTrigger className="w-full sm:w-[160px]"> 
             <SelectValue placeholder="All Transactions" />
           </SelectTrigger>
           <SelectContent>
@@ -285,34 +280,38 @@ const TransactionTable = ({
         </Select>
 
         {selectedIds.length >0 && (
-          <div className="flex items-center gap-2">
-            <Button variant={"destructive"} size="sm" onClick={handleBulkDelete}>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button variant={"destructive"} size="sm" onClick={handleBulkDelete} className="w-full sm:w-auto">
               <Trash className="h-4 w-4 mr-2"/>
-              Delete Selected ({selectedIds.length})
+              <span className="hidden sm:inline">Delete Selected ({selectedIds.length})</span>
+              <span className="sm:hidden">Delete ({selectedIds.length})</span>
             </Button>
           </div>
         )}
 
         {(searchTerm || typeFilter || recurringFilter) && (
-          <Button variant="outline" size="icon" onClick={handleClearFilters} title="Clear Filters">
+          <Button variant="outline" size="icon" onClick={handleClearFilters} title="Clear Filters" className="shrink-0">
             <X className="h-4 w-5"/>
           </Button>
         )}
       </div>
     </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto -mx-3 sm:mx-0 scroll-smooth [scrollbar-width:thin] [scrollbar-color:rgb(203_213_225)_transparent]">
+        <div className="min-w-[600px]">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-12.5">
-                <Checkbox
-                  onCheckedChange={handleSelectAll}
-                  checked={
-                    selectedIds.length ===
-                      filteredAndSortedTransactions.length &&
-                    filteredAndSortedTransactions.length > 0
-                  }
-                />
+                {!fetchLoading && (
+                  <Checkbox
+                    onCheckedChange={handleSelectAll}
+                    checked={
+                      selectedIds.length ===
+                        filteredAndSortedTransactions.length &&
+                      filteredAndSortedTransactions.length > 0
+                    }
+                  />
+                )}
               </TableHead>
               <TableHead
                 className="cursor-pointer"
@@ -328,7 +327,7 @@ const TransactionTable = ({
                     ))}
                 </div>
               </TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead className="min-w-[150px]">Description</TableHead>
               <TableHead
                 className="cursor-pointer"
                 onClick={() => handleSort("category")}
@@ -362,7 +361,34 @@ const TransactionTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAndSortedTransactions.length === 0 ? (
+            {fetchLoading ? (
+              // Skeleton loading rows
+              Array.from({ length: pageSize }).map((_, index) => (
+                <TableRow key={`skeleton-${index}`}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-4" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-20 ml-auto" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-16 rounded" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : filteredAndSortedTransactions.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
@@ -380,22 +406,24 @@ const TransactionTable = ({
                       checked={selectedIds.includes(transaction.id)}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {format(new Date(transaction.date), "PP")}
                   </TableCell>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell className="capitalize">
+                  <TableCell className="max-w-[200px] sm:max-w-none">
+                    <div className="truncate">{transaction.description}</div>
+                  </TableCell>
+                  <TableCell className="capitalize whitespace-nowrap">
                     <span
                       style={{
                         background: categoryColors[transaction.category],
                       }}
-                      className="px-2 py-1 rounded text-white text-sm"
+                      className="px-2 py-1 rounded text-white text-sm inline-block"
                     >
                       {transaction.category}
                     </span>
                   </TableCell>
                   <TableCell
-                    className="text-right font-medium"
+                    className="text-right font-medium whitespace-nowrap"
                     style={{
                       color: transaction.type === "EXPENSE" ? "red" : "green",
                     }}
@@ -470,39 +498,43 @@ const TransactionTable = ({
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* Pagination Controls */}
-      {pagination.totalCount > 0 && (
-        <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-muted-foreground">
+      {!fetchLoading && pagination.totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 px-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 flex-wrap">
+            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               Showing {(page - 1) * pageSize + 1} to{" "}
               {Math.min(page * pageSize, pagination.totalCount)} of{" "}
-              {pagination.totalCount} transactions
+              {pagination.totalCount}
             </p>
-            <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-sm text-muted-foreground">per page</span>
+            <div className="flex items-center gap-2">
+              <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                <SelectTrigger className="w-[80px] sm:w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">per page</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1 || fetchLoading}
+              className="text-xs sm:text-sm"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              <ChevronLeft className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Previous</span>
             </Button>
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
@@ -523,7 +555,7 @@ const TransactionTable = ({
                     size="sm"
                     onClick={() => handlePageChange(pageNum)}
                     disabled={fetchLoading}
-                    className="w-8 h-8 p-0"
+                    className="w-8 h-8 p-0 text-xs sm:text-sm"
                   >
                     {pageNum}
                   </Button>
@@ -535,9 +567,10 @@ const TransactionTable = ({
               size="sm"
               onClick={() => handlePageChange(page + 1)}
               disabled={page === pagination.totalPages || fetchLoading}
+              className="text-xs sm:text-sm"
             >
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight className="h-4 w-4 sm:ml-1" />
             </Button>
           </div>
         </div>
