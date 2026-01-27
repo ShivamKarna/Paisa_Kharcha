@@ -313,8 +313,8 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
         </div>
       </div>
       <div className="rounded-md border w-full">
-        <div className="overflow-x-auto w-full">
-          <div className="min-w-[650px] w-full">
+        <div className="overflow-x-auto w-full custom-scrollbar smooth-horizontal-scroll">
+          <div className="inline-block min-w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -346,11 +346,11 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
                         ))}
                     </div>
                   </TableHead>
-                  <TableHead className="min-w-[150px] max-w-[300px]">
+                  <TableHead className="min-w-[120px] max-w-[250px]">
                     Description
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer min-w-[120px]"
+                    className="cursor-pointer min-w-[100px]"
                     onClick={() => handleSort("category")}
                   >
                     <div className="flex items-center">
@@ -364,7 +364,7 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
                     </div>
                   </TableHead>
                   <TableHead
-                    className="cursor-pointer min-w-[120px]"
+                    className="cursor-pointer min-w-[100px]"
                     onClick={() => handleSort("amount")}
                   >
                     <div className="flex items-center justify-end">
@@ -377,8 +377,8 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
                         ))}
                     </div>
                   </TableHead>
-                  <TableHead className="min-w-[130px]">Recurring</TableHead>
-                  <TableHead className="w-14 min-w-[56px]" />
+                  <TableHead className="min-w-[110px]">Recurring</TableHead>
+                  <TableHead className="w-12 min-w-[48px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -434,7 +434,7 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
                       <TableCell className="whitespace-nowrap">
                         {format(new Date(transaction.date), "PP")}
                       </TableCell>
-                      <TableCell className="max-w-[200px] lg:max-w-[300px]">
+                      <TableCell className="max-w-[120px] md:max-w-[180px] lg:max-w-[250px]">
                         <div className="truncate">
                           {transaction.description}
                         </div>
