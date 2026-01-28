@@ -5,12 +5,28 @@ import { Plus } from "lucide-react";
 import { getUserAccounts } from "@/actions/dashboard";
 import AccountCard from "./_components/account-card";
 import { Account } from "@/types/account";
+import { getCurrentBudget } from "@/actions/budget";
+import { BudgetProgress } from "./_components/budget-progress";
 
 const DashboardPage = async () => {
   const account = await getUserAccounts();
+
+  const defaultAccount = account.find((acc) => acc.isDefault);
+
+  let budgetData = null;
+  if (defaultAccount) {
+    budgetData = await getCurrentBudget(defaultAccount.id);
+  }
+
   return (
-    <div className="px-5">
+    <div className="space-y-8">
       {/* Budget Progess */}
+      {defaultAccount && (
+        <BudgetProgress
+          initialBudget={budgetData?.budget}
+          currentExpenses={budgetData?.currentExpenses || 0}
+        />
+      )}
 
       {/* Dashboard OVerview */}
 
