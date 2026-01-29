@@ -80,9 +80,7 @@ export function BudgetProgress({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex-1">
-          <CardTitle className="text-sm font-medium">
-            Monthly Budget (Default Account)
-          </CardTitle>
+          <CardTitle className="text-sm font-medium">Monthly Budget</CardTitle>
           <div className="flex items-center gap-2 mt-1">
             {isEditing ? (
               <div className="flex items-center gap-2">
@@ -138,7 +136,7 @@ export function BudgetProgress({
         {initialBudget && (
           <div className="space-y-2">
             <Progress
-              value={percentUsed}
+              value={Math.min(percentUsed, 100)}
               extraStyles={`${
                 // add to Progress component
                 percentUsed >= 90
