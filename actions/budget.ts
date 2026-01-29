@@ -44,18 +44,26 @@ export async function getCurrentBudget(accountId: string) {
           gte: startOfMonth,
           lte: endOfMonth,
         },
-        accountId,
       },
       _sum: {
         amount: true,
       },
     });
 
+    const currentExpenses = expenses._sum.amount
+      ? Math.abs(expenses._sum.amount.toNumber())
+      : 0;
+
+    console.log("Budget Debug:", {
+      budgetAmount: budget?.amount.toNumber(),
+      currentExpenses,
+      startOfMonth,
+      endOfMonth,
+    });
+
     return {
       budget: budget ? { ...budget, amount: budget.amount.toNumber() } : null,
-      currentExpenses: expenses._sum.amount
-        ? expenses._sum.amount.toNumber()
-        : 0,
+      currentExpenses,
     };
   } catch (error) {
     console.error("Error fetching budget:", error);
