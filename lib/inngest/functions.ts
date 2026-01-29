@@ -2,7 +2,7 @@ import { db } from "../prisma";
 import { inngest } from "./client";
 
 export const checkBudgetAlert = inngest.createFunction(
-  { name: "hello-world" },
+  { id: "check-budget-alert", name: "Check Budget Alert" },
   { cron: "0 */6 * * *" },
   async ({ step }) => {
     const budgets = await step.run("fetch-budget", async () => {
@@ -52,7 +52,10 @@ export const checkBudgetAlert = inngest.createFunction(
           },
         });
         const totalExpenses = expenses._sum.amount?.toNumber() || 0;
-        const budgetAmount = budget.amount;
+        const budgetAmount =
+          typeof budget.amount === "number"
+            ? budget.amount
+            : Number(budget.amount);
         const percentageUsed = (totalExpenses / budgetAmount) * 100;
 
         if (
