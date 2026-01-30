@@ -1,5 +1,7 @@
+import { sendEmail } from "@/actions/send-email";
 import { db } from "../prisma";
 import { inngest } from "./client";
+import EmailTemplate from "@/emails/template";
 
 export const checkBudgetAlert = inngest.createFunction(
   { id: "check-budget-alert", name: "Check Budget Alert" },
@@ -58,19 +60,54 @@ export const checkBudgetAlert = inngest.createFunction(
             : Number(budget.amount);
         const percentageUsed = (totalExpenses / budgetAmount) * 100;
 
+        // console.log(`Budget ${budget.id} check:`, {
+        //   totalExpenses,
+        //   budgetAmount,
+        //   percentageUsed,
+        //   lastAlertSent: budget.lastAlertSent,
+        //   shouldSendAlert: percentageUsed >= 80,
+        //   isNewMonthCheck: budget.lastAlertSent
+        //     ? isNewMonth(new Date(budget.lastAlertSent), new Date())
+        //     : true,
+        // });
+
         if (
           percentageUsed >= 80 &&
           (!budget.lastAlertSent ||
             isNewMonth(new Date(budget.lastAlertSent), new Date()))
         ) {
+          // console.log(`Sending budget alert email to ${budget.user.email}`);
           // Send email
-
-          // console.log(percentageUsed, budget.lastAlertSent);
-          // Update lastAlertSent in db
-          await db.budget.update({
-            where: { id: budget.id },
-            data: { lastAlertSent: new Date() },
+          const emailResult = await sendEmail({
+            to: budget.user.email,
+            subject: `Budget Alert for ${defaultAccount.name}`,
+            react: EmailTemplate({
+              userName: budget.user.name || budget.user.email,
+              type: "budget-alert",
+              data: {
+                percentageUsed,
+                budgetAmount,
+                totalExpenses,
+              },
+            }),
           });
+
+          if (emailResult.success) {
+            // console.log(
+            //   `Email sent successfully to ${budget.user.email}`,
+            //   emailResult.data,
+            // );
+            // Update lastAlertSent in db
+            await db.budget.update({
+              where: { id: budget.id },
+              data: { lastAlertSent: new Date() },
+            });
+          } else {
+            // console.error(
+            //   `Failed to send email to ${budget.user.email}:`,
+            //   emailResult.error,
+            // );
+          }
         }
       });
     }
