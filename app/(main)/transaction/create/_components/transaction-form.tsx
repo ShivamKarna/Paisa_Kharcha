@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 
 const AddTransactionForm = () => {
   return <div>Transaction Form</div>;
