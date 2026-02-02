@@ -6,9 +6,9 @@ const aj = arcjet({
   rules: [
     tokenBucket({
       mode: "LIVE",
-      refillRate: 2,
+      refillRate: 20,
       interval: 3600,
-      capacity: 2, // allow 20 transactions per hour a day
+      capacity: 20, // allow 20 transactions per hour a day
     }),
   ],
 });
