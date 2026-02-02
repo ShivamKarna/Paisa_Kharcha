@@ -67,7 +67,7 @@ export function ReceiptScanner({ onScanComplete }: ReceiptScannerProps) {
         {scanReceiptLoading ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            <span>Scanning Receipt...</span>
+            <span>Scanning Receipt Please wait...</span>
           </>
         ) : (
           <>
