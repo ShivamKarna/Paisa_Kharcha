@@ -7,6 +7,8 @@ import {
   ReccuringInterval,
   TransactionStatus,
 } from "@/lib/generated/prisma/enums";
+import { request } from "@arcjet/next";
+import aj from "@/lib/arcjet";
 
 interface TransactionWithAmount {
   amount: { toNumber: () => number };
@@ -35,6 +37,32 @@ export async function createTransaction(data: CreateTransactionData) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
+
+    // get req data for arcjet
+    const req = await request();
+
+    // check rate limit
+    const decisoin = await aj.protect(req, {
+      userId,
+      requested: 1, // specify how many tokens to consume
+    });
+
+    if (decisoin.isDenied()) {
+      if (decisoin.reason.isRateLimit()) {
+        const { remaining, reset } = decisoin.reason;
+        console.error({
+          code: "RATE_LIMIT_EXCEEDED",
+          details: {
+            remaining,
+            resetInSeconds: reset,
+          },
+        });
+
+        throw new Error("Too many Requests. Please Try again Later !");
+      }
+
+      throw new Error("Request Blocked");
+    }
 
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
