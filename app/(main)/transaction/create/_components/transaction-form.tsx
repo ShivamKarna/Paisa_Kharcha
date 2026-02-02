@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { ReceiptScanner } from "./reciept-scanner";
 import { Account } from "@/types/account";
 import {
   Select,
@@ -24,13 +25,21 @@ import { Input } from "@/components/ui/input";
 import CreateAccountDrawer from "@/components/create-account-drawer";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2, Plus } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
+
+interface ScannedReceiptData {
+  amount: number;
+  date: Date;
+  description?: string;
+  category?: string;
+  merchantName?: string;
+}
 
 interface Category {
   id: string;
@@ -102,9 +111,25 @@ const AddTransactionForm = ({
   const filteredCategories = categories.filter(
     (category) => category.type === type,
   );
+
+  const handleScanComplete = (scannedData: ScannedReceiptData | null) => {
+    if (scannedData) {
+      setValue("amount", scannedData.amount.toString());
+      setValue("date", new Date(scannedData.date));
+      if (scannedData.description) {
+        setValue("description", scannedData.description);
+      }
+      if (scannedData.category) {
+        setValue("category", scannedData.category);
+      }
+      toast.success("Receipt scanned successfully");
+    }
+  };
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {/* AI reciept scanner */}
+      <ReceiptScanner onScanComplete={handleScanComplete} />
 
       {/* Type */}
       <div className="space-y-2">
@@ -290,17 +315,31 @@ const AddTransactionForm = ({
       )}
 
       {/* Butons for cancel and create transaction */}
-      <div className="">
+      <div className="space-y-3">
         <Button
           type="button"
           variant="outline"
-          className="w-full mb-2"
+          className="w-full h-12 text-base font-medium hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-[1.03] hover:ring-2 hover:ring-gray-400 dark:hover:ring-gray-500 transition-all duration-200 ease-out"
           onClick={() => router.back()}
         >
           Cancel
         </Button>
-        <Button type="submit" className="w-full" disabled={transactionLoading}>
-          Create Transaction
+        <Button
+          type="submit"
+          className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 hover:scale-[1.03] hover:ring-4 hover:ring-primary/30 transition-all duration-200 ease-out disabled:opacity-60 disabled:hover:scale-100 disabled:hover:ring-0"
+          disabled={transactionLoading}
+        >
+          {transactionLoading ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-5 w-5" />
+              Creating Transaction...
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-5 w-5" />
+              Create Transaction
+            </>
+          )}
         </Button>
       </div>
     </form>
