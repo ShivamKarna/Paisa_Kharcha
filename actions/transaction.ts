@@ -246,7 +246,16 @@ export async function updateTransaction(
           userId: user.id,
         },
         data: {
-          ...data,
+          type: data.type,
+          amount: data.amount,
+          description: data.description,
+          date: data.date,
+          category: data.category,
+          accountId: data.accountId,
+          receiptUrl: data.receiptUrl,
+          isReccuring: data.isRecurring,
+          reccuringInterval: data.recurringInterval,
+          status: data.status,
           nextReccuringDate:
             data.isRecurring && data.recurringInterval
               ? calculateNextRecurringDate(data.date, data.recurringInterval)
@@ -254,15 +263,17 @@ export async function updateTransaction(
         },
       });
 
-      // Update account balance
-      await tx.account.update({
-        where: { id: data.accountId },
-        data: {
-          balance: {
-            increment: netBalanceChange,
+      // Update account balance if needed
+      if (netBalanceChange !== 0) {
+        await tx.account.update({
+          where: { id: data.accountId },
+          data: {
+            balance: {
+              increment: netBalanceChange,
+            },
           },
-        },
-      });
+        });
+      }
 
       return updated;
     });
