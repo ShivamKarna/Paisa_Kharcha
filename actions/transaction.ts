@@ -10,6 +10,7 @@ import {
 import { request } from "@arcjet/next";
 import aj from "@/lib/arcjet";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { calculateNextRecurringDate } from "@/lib/utils";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
@@ -132,30 +133,6 @@ export async function createTransaction(data: CreateTransactionData) {
       error instanceof Error ? error.message : "An error occurred",
     );
   }
-}
-// helper func
-function calculateNextRecurringDate(
-  startDate: Date,
-  interval: ReccuringInterval,
-) {
-  const date = new Date(startDate);
-
-  switch (interval) {
-    case "DAILY":
-      date.setDate(date.getDate() + 1);
-      break;
-    case "WEEKLY":
-      date.setDate(date.getDate() + 7);
-      break;
-    case "MONTHLY":
-      date.setMonth(date.getMonth() + 1);
-      break;
-    case "YEARLY":
-      date.setFullYear(date.getFullYear() + 1);
-      break;
-  }
-
-  return date;
 }
 
 export async function scanReciept(file: File) {
