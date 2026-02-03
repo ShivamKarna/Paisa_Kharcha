@@ -70,6 +70,8 @@ const AddTransactionForm = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const editid = searchParams.get("edit");
+  // Derive edit mode from editid presence
+  const isEditMode = !!editid || editMode;
   const {
     register,
     setValue,
@@ -81,7 +83,7 @@ const AddTransactionForm = ({
   } = useForm({
     resolver: zodResolver(transactionSchema),
     defaultValues:
-      editMode && initialData
+      isEditMode && initialData
         ? {
             type: (initialData.type as "INCOME" | "EXPENSE") || "EXPENSE",
             amount: String(initialData.amount || ""),
@@ -113,7 +115,7 @@ const AddTransactionForm = ({
     fn: transactionFn,
     data: transactionResult,
   } = useFetch(
-    editMode
+    isEditMode
       ? (data: CreateTransactionData) => updateTransaction(editid!, data)
       : createTransaction,
   );
@@ -133,7 +135,7 @@ const AddTransactionForm = ({
   useEffect(() => {
     if (transactionResult?.success && !transactionLoading) {
       toast.success(
-        editMode
+        isEditMode
           ? "Transaction updated Successfully"
           : "Transaction created Successfully",
       );
@@ -142,7 +144,7 @@ const AddTransactionForm = ({
         router.push(`/account/${transactionResult.data.accountId}`);
       }
     }
-  }, [transactionResult, transactionLoading, reset, router, editMode]);
+  }, [transactionResult, transactionLoading, reset, router, isEditMode]);
 
   const filteredCategories = categories.filter(
     (category) => category.type === type,
@@ -363,25 +365,27 @@ const AddTransactionForm = ({
         <Button
           type="button"
           variant="outline"
-          className="w-full h-12 text-base font-medium hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-[1.03] hover:ring-2 hover:ring-gray-400 dark:hover:ring-gray-500 transition-all duration-200 ease-out"
+          className="w-full h-12 text-base font-medium hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-300 ease-in-out"
           onClick={() => router.back()}
         >
           Cancel
         </Button>
         <Button
           type="submit"
-          className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 hover:scale-[1.03] hover:ring-4 hover:ring-primary/30 transition-all duration-200 ease-out disabled:opacity-60 disabled:hover:scale-100 disabled:hover:ring-0"
+          className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:hover:shadow-none"
           disabled={transactionLoading}
         >
           {transactionLoading ? (
             <>
               <Loader2 className="animate-spin mr-2 h-5 w-5" />
-              {editMode ? "Updating Transaction..." : "Creating Transaction..."}
+              {isEditMode
+                ? "Updating Transaction..."
+                : "Creating Transaction..."}
             </>
           ) : (
             <>
               <Plus className="mr-2 h-5 w-5" />
-              {editMode ? "Update Transaction" : "Create Transaction"}
+              {isEditMode ? "Update Transaction" : "Create Transaction"}
             </>
           )}
         </Button>
