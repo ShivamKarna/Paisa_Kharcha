@@ -275,7 +275,7 @@ export default function DashboardOverview({
                     }
                     formatter={(value, entry) => {
                       const data = entry.payload;
-                      return `${value}: $${data?.value.toFixed(2)}`;
+                      return `${value}: $${data?.value.toFixed(2)}`; // added optional chaining for now
                     }}
                   />
                 </PieChart>
