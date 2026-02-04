@@ -273,9 +273,9 @@ export default function DashboardOverview({
                     wrapperStyle={
                       isMobile ? { fontSize: "12px", paddingTop: "10px" } : {}
                     }
-                    formatter={(value, entry: any) => {
+                    formatter={(value, entry) => {
                       const data = entry.payload;
-                      return `${value}: $${data.value.toFixed(2)}`;
+                      return `${value}: $${data?.value.toFixed(2)}`;
                     }}
                   />
                 </PieChart>
