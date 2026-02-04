@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -24,13 +24,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEEAD",
-  "#D4A5A5",
-  "#9FA8DA",
+  "#FF1744", // Vibrant Red
+  "#00E676", // Bright Green
+  "#2979FF", // Electric Blue
+  "#FF9100", // Vivid Orange
+  "#D500F9", // Vivid Purple
+  "#00E5FF", // Cyan
+  "#FFEA00", // Bright Yellow
+  "#FF3D00", // Deep Orange
 ];
 
 interface Account {
@@ -51,6 +52,17 @@ export default function DashboardOverview({
   const [selectedAccountId, setSelectedAccountId] = useState(
     accounts.find((a: Account) => a.isDefault)?.id || accounts[0]?.id,
   );
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Filter transactions for selected account
   const accountTransactions = transactions.filter(
@@ -185,19 +197,57 @@ export default function DashboardOverview({
               style={{ aspectRatio: 1, maxWidth: "500px", maxHeight: "500px" }}
             >
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart
+                  margin={
+                    isMobile
+                      ? { top: 0, right: 0, bottom: 60, left: 0 }
+                      : { top: 20, right: 80, bottom: 20, left: 80 }
+                  }
+                >
                   <Pie
                     data={pieChartData}
                     cx="50%"
-                    cy="50%"
-                    innerRadius="60%"
-                    outerRadius="90%"
+                    cy={isMobile ? "40%" : "45%"}
+                    innerRadius={isMobile ? "50%" : "55%"}
+                    outerRadius={isMobile ? "70%" : "75%"}
                     cornerRadius={8}
                     fill="#8884d8"
                     paddingAngle={3}
                     dataKey="value"
-                    label={({ name, value }) => `${name}: $${value.toFixed(2)}`}
-                    labelLine={true}
+                    label={
+                      !isMobile
+                        ? ({ cx, cy, midAngle, outerRadius, name, value }) => {
+                            const RADIAN = Math.PI / 180;
+                            const radius = (outerRadius || 0) + 30;
+                            const angle = midAngle || 0;
+                            const x =
+                              (cx || 0) + radius * Math.cos(-angle * RADIAN);
+                            const y =
+                              (cy || 0) + radius * Math.sin(-angle * RADIAN);
+
+                            return (
+                              <text
+                                x={x}
+                                y={y}
+                                fill="currentColor"
+                                textAnchor={x > (cx || 0) ? "start" : "end"}
+                                dominantBaseline="central"
+                                className="text-sm font-medium"
+                              >
+                                {`${name}: $${value.toFixed(2)}`}
+                              </text>
+                            );
+                          }
+                        : false
+                    }
+                    labelLine={
+                      !isMobile
+                        ? {
+                            stroke: "currentColor",
+                            strokeWidth: 1,
+                          }
+                        : false
+                    }
                   >
                     {pieChartData.map((entry, index) => (
                       <Cell
@@ -218,8 +268,15 @@ export default function DashboardOverview({
                   />
                   <Legend
                     verticalAlign="bottom"
-                    height={36}
+                    height={isMobile ? 80 : 50}
                     iconType="circle"
+                    wrapperStyle={
+                      isMobile ? { fontSize: "12px", paddingTop: "10px" } : {}
+                    }
+                    formatter={(value, entry: any) => {
+                      const data = entry.payload;
+                      return `${value}: $${data.value.toFixed(2)}`;
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
