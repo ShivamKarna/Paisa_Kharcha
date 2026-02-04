@@ -22,6 +22,25 @@ export interface CreateAccountData {
   isDefault: boolean;
 }
 
+export interface SerializedTransaction {
+  id: string;
+  accountId: string;
+  type: string;
+  date: Date | string;
+  category: string;
+  amount: number;
+  description?: string | null;
+  userId: string;
+  receiptUrl?: string | null;
+  isReccuring: boolean;
+  reccuringInterval?: string | null;
+  nextReccuringDate?: Date | string | null;
+  lastProcessed?: Date | string | null;
+  status: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 const serializeTransaction = (obj: {
   balance?: { toNumber: () => number };
   [key: string]: unknown;
@@ -35,6 +54,21 @@ const serializeTransaction = (obj: {
     serialized.balance = obj.balance.toNumber();
   }
   return serialized as Account;
+};
+
+const serializeTransactionData = (obj: {
+  amount?: { toNumber: () => number };
+  [key: string]: unknown;
+}): SerializedTransaction => {
+  const serialized: Record<string, unknown> = { ...obj };
+  if (
+    obj.amount &&
+    typeof obj.amount === "object" &&
+    "toNumber" in obj.amount
+  ) {
+    serialized.amount = obj.amount.toNumber();
+  }
+  return serialized as unknown as SerializedTransaction;
 };
 
 export async function createAccount(data: CreateAccountData) {
@@ -130,4 +164,25 @@ export async function getUserAccounts(): Promise<Account[]> {
     serializeTransaction(account),
   );
   return serializedAccounts;
+}
+
+export async function getDashboardData() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  const user = await db.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Get all user transactions
+  const transactions = await db.transaction.findMany({
+    where: { userId: user.id },
+    orderBy: { date: "desc" },
+  });
+
+  return transactions.map(serializeTransactionData);
 }
