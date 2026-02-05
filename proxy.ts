@@ -15,7 +15,7 @@ export default clerkMiddleware(
     }
   },
   {
-    clockSkewInMs: 60000, // Allow 60 seconds of clock skew tolerance
+    clockSkewInMs: 300000, // Allow 5 minutes of clock skew tolerance
   },
 );
 
