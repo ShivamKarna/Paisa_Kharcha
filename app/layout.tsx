@@ -10,7 +10,8 @@ import Link from "next/link";
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Paisa Kharcha - Smart Expense Tracker",
-  description: "Track, analyze, and optimize your spending with AI-powered insights",
+  description:
+    "Track, analyze, and optimize your spending with AI-powered insights",
   manifest: "/manifest.json",
   icons: {
     icon: "/logo.png",
