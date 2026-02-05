@@ -3,8 +3,17 @@ import React from "react";
 
 const Page = () => {
   return (
-    <div>
-      <SignUp fallbackRedirectUrl="/dashboard" signInUrl="/sign-in" />
+    <div className="flex items-center justify-center min-h-screen">
+      <SignUp
+        fallbackRedirectUrl="/dashboard"
+        signInUrl="/sign-in"
+        appearance={{
+          elements: {
+            rootBox: "mx-auto",
+            card: "shadow-lg",
+          },
+        }}
+      />
     </div>
   );
 };
