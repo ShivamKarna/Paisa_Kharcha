@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { TrendingUp, Zap, PieChart } from "lucide-react";
+import { TrendingUp, Zap, PieChart, Github, Star } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
 const HeroSection = () => {
@@ -60,7 +60,7 @@ const HeroSection = () => {
     <section className="pt-40 pb-20 px-4">
       <div className="container mx-auto text-center">
         <h1 className="text-5xl md:text-8xl lg:text-[105px] pb-6 gradient-title">
-          Manage Your Finances <br /> with Intelligence
+          Take Control of Your Money <br /> with Smart AI
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
           An AI-powered financial management platform that helps you track,
@@ -68,13 +68,18 @@ const HeroSection = () => {
         </p>
         <div className="flex justify-center space-x-4 mb-5">
           <Link href={isSignedIn ? "/dashboard" : "/sign-in"}>
-            <Button size="lg" className="px-8">
+            <Button size="lg" className="px-8 bg-green-600 hover:bg-green-700">
               Get Started
             </Button>
           </Link>
           <Link href="https://github.com/ShivamKarna/Paisa_Kharcha">
-            <Button size="lg" variant="outline" className="px-8">
-              See Docs
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 flex items-center gap-2"
+            >
+              <Github className="w-5 h-5" />
+              Open Source Project
             </Button>
           </Link>
         </div>
@@ -83,7 +88,7 @@ const HeroSection = () => {
             <Image
               src="/banner.jpg"
               width={1280}
-              height={720}
+              height={600}
               alt="Dashboard Preview"
               className="rounded-lg shadow-2xl border mx-auto"
               priority
@@ -108,7 +113,6 @@ const HeroSection = () => {
             </div>
           ))}
         </div>
-
         {/* Capabilities Scroll */}
         <div className="mt-24 overflow-hidden">
           <p className="text-sm text-gray-500 mb-6 uppercase tracking-wider font-medium">
