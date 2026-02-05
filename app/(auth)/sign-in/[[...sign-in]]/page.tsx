@@ -8,6 +8,10 @@ const Page = () => {
         fallbackRedirectUrl="/dashboard"
         signUpUrl="/sign-up"
         appearance={{
+          variables: {
+            colorPrimary: "#16a34a",
+            colorText: "#0f172a",
+          },
           elements: {
             rootBox: "mx-auto",
             card: "shadow-lg",
