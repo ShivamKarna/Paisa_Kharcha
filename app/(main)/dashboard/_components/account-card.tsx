@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Account } from "@/types/account";
 import {
   Card,
@@ -14,12 +14,16 @@ import { Switch } from "@/components/ui/switch";
 import useFetch from "@/hooks/use-fetch";
 import { updateDefaultAccount } from "@/actions/accounts";
 import { toast } from "sonner";
+import { LoadingBar } from "@/components/ui/loading-bar";
+import { useRouter } from "next/navigation";
 interface AccountCardProps {
   account: Account;
 }
 
 const AccountCard = ({ account }: AccountCardProps) => {
   const { name, type, balance, id, isDefault } = account;
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const {
     loading: updateDefaultLoading,
@@ -28,10 +32,20 @@ const AccountCard = ({ account }: AccountCardProps) => {
     error,
   } = useFetch(updateDefaultAccount);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on the switch
+    if ((e.target as HTMLElement).closest('button[role="switch"]')) {
+      return;
+    }
+    setIsNavigating(true);
+    router.push(`/account/${id}`);
+  };
+
   const handleDefaultChange = async (
     event: React.MouseEvent<HTMLButtonElement>,
   ) => {
     event.preventDefault();
+    event.stopPropagation();
 
     if (isDefault) {
       toast.warning("You need atleast 1 Default Account ");
@@ -60,8 +74,12 @@ const AccountCard = ({ account }: AccountCardProps) => {
 
   return (
     <div>
-      <Card className="hover:shadow-md transition-shadow group relative">
-        <Link href={`/account/${id}`}>
+      <LoadingBar loading={updateDefaultLoading || isNavigating} />
+      <Card
+        className="hover:shadow-md transition-shadow group relative cursor-pointer"
+        onClick={handleCardClick}
+      >
+        <div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-semibold uppercase">
               {name}
@@ -95,7 +113,7 @@ const AccountCard = ({ account }: AccountCardProps) => {
               Expense
             </div>
           </CardFooter>
-        </Link>
+        </div>
       </Card>
     </div>
   );
