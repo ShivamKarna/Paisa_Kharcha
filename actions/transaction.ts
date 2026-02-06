@@ -37,10 +37,30 @@ export interface CreateTransactionData {
   [key: string]: unknown;
 }
 
-const serializeAmount = (obj: TransactionWithAmount) => ({
-  ...obj,
-  amount: obj.amount.toNumber(),
-});
+export interface SerializedTransaction {
+  id: string;
+  type: string;
+  amount: number;
+  description?: string | null;
+  date: Date | string;
+  category: string;
+  accountId: string;
+  userId: string;
+  receiptUrl?: string | null;
+  isReccuring: boolean;
+  reccuringInterval?: string | null;
+  nextReccuringDate?: Date | string | null;
+  lastProcessed?: Date | string | null;
+  status: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+const serializeAmount = (obj: TransactionWithAmount): SerializedTransaction =>
+  ({
+    ...obj,
+    amount: obj.amount.toNumber(),
+  }) as SerializedTransaction;
 export async function createTransaction(data: CreateTransactionData) {
   try {
     const { userId } = await auth();

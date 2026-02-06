@@ -54,6 +54,7 @@ import {
 } from "@/actions/accounts";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import TransactionDetailModal from "@/components/transaction-detail-modal";
 
 const RECURRING_INTERVALS: Record<string, string> = {
   DAILY: "Daily",
@@ -92,6 +93,10 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [recurringFilter, setRecurringFilter] = useState("");
+  const [selectedTransactionId, setSelectedTransactionId] = useState<
+    string | null
+  >(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     loading: fetchLoading,
@@ -250,6 +255,22 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
     setPage(1);
     setSelectedIds([]);
   };
+
+  const handleRowClick = (transactionId: string, e: React.MouseEvent) => {
+    // Don't open modal if clicking on checkbox or dropdown
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest('[role="checkbox"]')) {
+      return;
+    }
+    setSelectedTransactionId(transactionId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTransactionId(null);
+  };
+
   return (
     <div className="space-y-4 w-full">
       <div className="flex flex-col lg:flex-row gap-4">
@@ -422,7 +443,11 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
                   </TableRow>
                 ) : (
                   filteredAndSortedTransactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
+                    <TableRow
+                      key={transaction.id}
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={(e) => handleRowClick(transaction.id, e)}
+                    >
                       <TableCell className="w-14 min-w-14 px-3">
                         <div className="flex items-center justify-center">
                           <Checkbox
@@ -622,6 +647,13 @@ const TransactionTable = ({ accountId }: { accountId: string }) => {
           </div>
         </div>
       )}
+
+      {/* Transaction Detail Modal */}
+      <TransactionDetailModal
+        transactionId={selectedTransactionId}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

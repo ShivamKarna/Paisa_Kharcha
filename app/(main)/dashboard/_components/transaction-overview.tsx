@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import TransactionDetailModal from "@/components/transaction-detail-modal";
 
 const COLORS = [
   "#FF1744", // Vibrant Red
@@ -53,6 +54,10 @@ export default function DashboardOverview({
     accounts.find((a: Account) => a.isDefault)?.id || accounts[0]?.id,
   );
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<
+    string | null
+  >(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -111,6 +116,16 @@ export default function DashboardOverview({
     }),
   );
 
+  const handleTransactionClick = (transactionId: string) => {
+    setSelectedTransactionId(transactionId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTransactionId(null);
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Recent Transactions Card */}
@@ -145,7 +160,8 @@ export default function DashboardOverview({
               recentTransactions.map((transaction: SerializedTransaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => handleTransactionClick(transaction.id)}
                 >
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none">
@@ -284,6 +300,13 @@ export default function DashboardOverview({
           )}
         </CardContent>
       </Card>
+
+      {/* Transaction Detail Modal */}
+      <TransactionDetailModal
+        transactionId={selectedTransactionId}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
