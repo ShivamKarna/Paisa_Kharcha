@@ -75,7 +75,6 @@ const TransactionDetailModal = ({
 
   return (
     <>
-      <LoadingBar loading={loading} />
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
