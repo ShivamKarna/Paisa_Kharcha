@@ -28,7 +28,7 @@ const AddTransactionPage = async ({
         accounts={accounts}
         categories={defaultCategories}
         editMode={!!editId}
-        initialData={initialData}
+        initialData={initialData as Record<string, unknown> | null}
       />
     </div>
   );
