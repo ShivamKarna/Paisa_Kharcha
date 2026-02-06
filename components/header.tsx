@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { LayoutDashboard, PenBox } from "lucide-react";
 import { checkUser } from "@/lib/checkUser";
+import { NavButtonWithLoading } from "./nav-button-with-loading";
 
 const Header = async () => {
   await checkUser();
@@ -41,18 +42,19 @@ const Header = async () => {
               href={"/dashboard"}
               className="text-gray-600 hover:text-blue-600"
             >
-              <Button variant="outline">
+              <Button variant="outline" className="h-10 px-4">
                 <LayoutDashboard size={18} />
                 <span className="hidden md:inline">Dashboard</span>
               </Button>
             </Link>
 
-            <Link href={"/transaction/create"}>
-              <Button className="flex items-center gap-2">
-                <PenBox size={18} />
-                <span className="hidden md:inline">Add Transaction</span>
-              </Button>
-            </Link>
+            <NavButtonWithLoading
+              href="/transaction/create"
+              className="flex items-center gap-2 h-10 px-4"
+            >
+              <PenBox size={18} />
+              <span className="hidden md:inline">Add Transaction</span>
+            </NavButtonWithLoading>
 
             <UserButton
               appearance={{

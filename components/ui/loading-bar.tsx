@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Progress } from "./progress";
 
 interface LoadingBarProps {
@@ -9,6 +10,12 @@ interface LoadingBarProps {
 
 export const LoadingBar = ({ loading }: LoadingBarProps) => {
   const [progress, setProgress] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (loading) {
@@ -42,25 +49,24 @@ export const LoadingBar = ({ loading }: LoadingBarProps) => {
   }, [loading]);
 
   if (!loading && progress === 0) return null;
+  if (!mounted) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Glassmorphism overlay */}
-      <div className="fixed inset-0 z-50 bg-white/30 backdrop-blur-sm" />
+      <div className="fixed inset-0 z-9999 bg-white/40 backdrop-blur-sm" />
 
       {/* Loading bar */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-80 md:w-96">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl">
-          <div className="text-center mb-4">
-            <p className="text-white font-semibold text-lg">Loading...</p>
-          </div>
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-9999 w-80 md:w-96">
+        <div className="bg-white backdrop-blur-md rounded-2xl p-6 border border-gray-200 shadow-2xl">
           <Progress
             value={progress}
-            className="h-3 rounded-full bg-white/30"
-            extraStyles="transition-transform duration-200 ease-out bg-blue-500"
+            className="h-3 rounded-full bg-gray-200"
+            extraStyles="transition-transform duration-200 ease-out bg-green-500"
           />
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 };
