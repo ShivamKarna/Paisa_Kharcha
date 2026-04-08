@@ -38,16 +38,7 @@ A smart, full-stack expense tracking web application that helps you manage your 
 - PostgreSQL database
 - Accounts for: [Clerk](https://clerk.com), [Resend](https://resend.com), [Inngest](https://inngest.com), [Google AI Studio](https://aistudio.google.com)
 
-### Installation
 
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd expense_tracker
-
-# Install dependencies
-npm install
-```
 
 ### Environment Variables
 
@@ -73,15 +64,46 @@ ARCJET_KEY=
 
 ### Run Locally
 
-```bash
-# Push the database schema
-npx prisma db push
+**1. Clone the repository**
 
-# Start the development server
+```bash
+git clone <your-repo-url>
+cd expense_tracker
+```
+
+**2. Install dependencies**
+
+```bash
+npm install
+```
+
+**3. Set up the database**
+
+```bash
+npx prisma db push
+```
+
+This syncs the Prisma schema to your PostgreSQL database.
+
+**4. Start the Next.js dev server**
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+**5. Start the Inngest dev server** *(required for background jobs)*
+
+In a separate terminal, run:
+
+```bash
+npx inngest-cli@latest dev
+```
+
+This starts the local Inngest dev server at [http://localhost:8288](http://localhost:8288) and connects to your Next.js app to process background jobs — including recurring transaction processing and budget alert emails.
+
+> **Note:** Without the Inngest dev server running, scheduled/recurring transactions and budget alert emails will not trigger locally.
 
 ## Project Structure
 
